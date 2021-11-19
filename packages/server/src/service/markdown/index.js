@@ -1,64 +1,32 @@
-const MarkdownIt = require('markdown-it');
-const emojiPlugin = require('markdown-it-emoji');
-const subPlugin = require('markdown-it-sub');
-const supPlugin = require('markdown-it-sup');
-
-const { resolveHighlighter } = require('./highlight');
-const { katexPlugin } = require('./katex');
-const { mathjaxPlugin } = require('./mathjax');
+const { marked } = require('marked');
 const { sanitize } = require('./xss');
+const { katexRenderer } = require('./katex');
+const { resolveHighlighter } = require('./highlight');
+const { markedTexExtensions } = require('./markedMathExtension');
 
 const getMarkdownParser = () => {
   const { markdown = {} } = think.config();
-  const { config = {}, plugin = {} } = markdown;
+  const { config = {} } = markdown;
 
-  // markdown-it instance
-  const markdownIt = MarkdownIt({
+  // marked
+  marked.setOptions({
     breaks: true,
-    linkify: true, // Auto convert URL-like text to links
-    typographer: true, // Enable some language-neutral replacement + quotes beautification
+    headerIds: false,
+    smartypants: true,
 
     // default highlight
     highlight: (code, lang) => {
       const highlighter = resolveHighlighter(lang);
 
-      return highlighter ? highlighter(code) : '';
+      return highlighter ? highlighter(code) : code;
     },
 
     ...config,
-
-    // should always enable html option due to parsed emoji
-    html: true,
   });
 
-  const { emoji, tex, mathjax, katex, sub, sup } = plugin;
+  marked.use(markedTexExtensions);
 
-  // parse emoji
-  if (emoji !== false) {
-    markdownIt.use(emojiPlugin, typeof emoji === 'object' ? emoji : {});
-  }
-
-  // parse sub
-  if (sub !== false) {
-    markdownIt.use(subPlugin);
-  }
-
-  // parse sup
-  if (sup !== false) {
-    markdownIt.use(supPlugin);
-  }
-
-  // parse tex
-  if (tex === 'katex') {
-    markdownIt.use(katexPlugin, {
-      ...katex,
-      output: 'mathml',
-    });
-  } else if (tex !== false) {
-    markdownIt.use(mathjaxPlugin, mathjax);
-  }
-
-  return (content) => sanitize(markdownIt.render(content));
+  return (content) => katexRenderer(sanitize(marked(content))).innerHTML;
 };
 
 module.exports = { getMarkdownParser };

@@ -29,8 +29,12 @@ module.exports = class extends think.Controller {
           serverURL: location.protocol + '//' + location.host + location.pathname.replace(/\\/+$/, ''),
           recaptchaV3Key: '${process.env.RECAPTCHA_V3_KEY || ''}',
           turnstileKey: '${process.env.TURNSTILE_KEY || ''}',
+          texRenderer: (displayMode, tex) =>
+            window.katex.renderToString(tex, {displayMode, throwOnError: false}),
         });
       </script>
+      <link href='//unpkg.com/katex/dist/katex.min.css' rel='stylesheet' />
+      <script src="https://unpkg.com/katex/dist/katex.min.js"></script>
     </body>
     </html>`;
   }

@@ -32,6 +32,7 @@ const sanitize = (content) =>
     content,
     Object.assign(
       {
+        RETURN_DOM: true,
         FORBID_TAGS: ['form', 'input', 'style'],
         FORBID_ATTR: ['autoplay', 'style'],
       },

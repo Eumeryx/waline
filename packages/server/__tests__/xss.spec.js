@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { sanitize } from '../src/service/markdown/xss';
 
 const parser = (content) =>
-  sanitize(new MarkdownIt({ html: true }).render(content));
+  sanitize(new MarkdownIt({ html: true }).render(content)).innerHTML;
 
 describe('XSS test', () => {
   it('Should render', () => {
