@@ -1,8 +1,7 @@
-import { babel, getBabelOutputPlugin } from '@rollup/plugin-babel';
+import { getBabelOutputPlugin } from '@rollup/plugin-babel';
 import commonjs from '@rollup/plugin-commonjs';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import ts from 'rollup-plugin-ts';
-import dts from 'rollup-plugin-dts';
 import terser from '@rollup/plugin-terser';
 import replace from '@rollup/plugin-replace';
 import pkg from './package.json' assert { type: 'json' };
@@ -29,14 +28,31 @@ const commonOptions = {
     commonjs(),
     terser(),
   ],
-  treeshake: 'smallest',
+  treeshake: {
+    preset: 'smallest',
+    moduleSideEffects: true,
+  },
 };
 
 const babelPlugin = getBabelOutputPlugin({
   moduleId: 'Waline',
-  presets: [['@babel/preset-env', { modules: 'umd' }]],
+  presets: [['@babel/preset-env', { modules: false }]],
 });
 
+// lazy marked and katex, init package
+export default {
+  input: './src/init.ts',
+  output: {
+    dir: './dist',
+    entryFileNames: 'waline.mjs',
+    format: 'esm',
+    sourcemap: true,
+    plugins: [babelPlugin, terser()],
+  },
+  ...commonOptions,
+};
+
+/*
 export default [
   // TODO: Remove this in future
 
@@ -265,3 +281,4 @@ export default [
     plugins: [dts({ compilerOptions: { preserveSymlinks: false } })],
   },
 ];
+*/
