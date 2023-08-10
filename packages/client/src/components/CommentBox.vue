@@ -147,7 +147,7 @@
             class="wl-action"
             :class="{ active: showPreview }"
             :title="locale.preview"
-            @click="showPreview = !showPreview"
+            @click="switchPreview"
           >
             <PreviewIcon />
           </button>
@@ -741,6 +741,19 @@ const onMessageReceive = ({
     .forEach((store) => store.setItem('WALINE_USER', JSON.stringify(userInfo)));
 };
 
+// switch preview
+const switchPreview = (): void => {
+  if (showPreview.value === true) {
+    showPreview.value = false;
+  } else {
+    showPreview.value = true;
+
+    parseMarkdown(content.value, emoji.value.map).then(
+      (html) => (previewText.value = html)
+    );
+  }
+};
+
 onMounted(() => {
   document.body.addEventListener('click', popupHandler);
   window.addEventListener('message', onMessageReceive);
@@ -770,14 +783,13 @@ onMounted(() => {
   watch(
     () => editor.value,
     (value) => {
-      const { highlighter, texRenderer } = config.value;
+      if (showPreview.value === true) {
+        parseMarkdown(value, emoji.value.map).then(
+          (html) => (previewText.value = html)
+        );
+      }
 
       content.value = value;
-      previewText.value = parseMarkdown(value, {
-        emojiMap: emoji.value.map,
-        highlighter,
-        texRenderer,
-      });
       wordNumber.value = getWordNumber(value);
 
       if (value) autosize(editorRef.value!);

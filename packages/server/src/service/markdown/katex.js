@@ -1,4 +1,5 @@
 const katex = require('katex');
+
 require('katex/contrib/mhchem');
 
 const katexRenderer = (htmlElement) => {

@@ -1,8 +1,9 @@
 const { marked } = require('marked');
-const { sanitize } = require('./xss');
-const { katexRenderer } = require('./katex');
+
 const { resolveHighlighter } = require('./highlight');
+const { katexRenderer } = require('./katex');
 const { markedTexExtensions } = require('./markedMathExtension');
+const { sanitize } = require('./xss');
 
 const getMarkdownParser = () => {
   const { markdown = {} } = think.config();

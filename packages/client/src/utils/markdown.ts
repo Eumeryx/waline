@@ -1,11 +1,4 @@
-import { marked } from 'marked';
-
-import { markedTexExtensions } from './markedMathExtension.js';
-import {
-  type WalineEmojiMaps,
-  type WalineHighlighter,
-  type WalineTexRenderer,
-} from '../typings/index.js';
+import { type WalineEmojiMaps } from '../typings/index.js';
 
 export const parseEmoji = (text = '', emojiMap: WalineEmojiMaps = {}): string =>
   text.replace(/:(.+?):/g, (placeholder, key: string) =>
@@ -14,28 +7,13 @@ export const parseEmoji = (text = '', emojiMap: WalineEmojiMaps = {}): string =>
       : placeholder
   );
 
-export interface ParseMarkdownOptions {
-  emojiMap: WalineEmojiMaps;
-  highlighter: WalineHighlighter | false;
-  texRenderer: WalineTexRenderer | false;
-}
-
 export const parseMarkdown = (
   content: string,
-  { emojiMap, highlighter, texRenderer }: ParseMarkdownOptions
-): string => {
-  marked.setOptions({
-    highlight: highlighter || undefined,
-    breaks: true,
-    smartLists: true,
-    smartypants: true,
-  });
-
-  if (texRenderer) {
-    const extensions = markedTexExtensions(texRenderer);
-
-    marked.use({ extensions });
-  }
-
-  return marked.parse(parseEmoji(content, emojiMap));
-};
+  emojiMap: WalineEmojiMaps
+): Promise<string> =>
+  import('./markedLazy.js')
+    .then(({ MD }) => MD(parseEmoji(content, emojiMap)))
+    .catch(
+      () =>
+        '<p>The markdown renderer failed to load, but you can still comment.</p>'
+    );
